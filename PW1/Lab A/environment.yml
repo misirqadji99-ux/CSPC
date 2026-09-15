@@ -1,0 +1,80 @@
+name: cspc
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pytest
+Computer Science for Physics and Chemistry PW1 – Lab A
+Part 2 — Create the CSPC repo and its structure (15 min)
+Create the repository folder and the session’s subfolders, then open in VSCode:
+mkdir -p CSPC/"PW1/Lab A"
+cd CSPC
+code .
+Inside PW1/Lab A/, create environment.yml with this content:
+name: cspc
+channels:
+- conda-forge
+dependencies:
+- python=3.11
+- numpy
+- pytest
+Build and activate the environment (run this from inside PW1/Lab A/):
+conda env create -f environment.yml
+conda activate cspc
+TODO: Create a .gitignore at the root of CSPC (not inside Lab A). Add the entries that
+stop Python’s junk (the cache folder and compiled files) from ever being committed. You saw
+which entries belong there in the lecture.
+Checkpoint 2: conda activate cspc works, the folder structure matches the diagram above,
+and .gitignore sits at the repo root.
+Part 3 — Add the simulation files (10 min)
+Download decay.py and test decay.py from Moodle and place them inside PW1/Lab A/. Then
+confirm the environment can run the simulation:
+cd "PW1/Lab A"
+python -c "import decay; print(decay.simulate(1000, 0.4)[:5])"
+"""
+Radioactive decay simulation.
+
+A sample starts with N0 atoms. Each atom decays at random: in a short
+time step dt it decays with probability lam*dt, independently of the others.
+No one can predict which atom decays when, yet the average over the whole
+sample follows the exact law  N(t) = N0 * exp(-lam * t).
+
+Two versions are provided so you can compare their speed:
+  - simulate_loop : a pure-Python loop over every atom (slow)
+  - simulate      : a vectorised NumPy version (fast)
+Both return an array of the atom count at each time step.
+"""
+
+import numpy as np
+
+
+def simulate_loop(N0, lam, dt=0.05, steps=200, seed=0):
+    """Radioactive decay, pure-Python loop version (slow)."""
+    if lam < 0:
+        raise ValueError("lam must be >= 0")
+    rng = np.random.default_rng(seed)
+    N = N0
+    counts = [N0]
+    for _ in range(steps):
+        decayed = 0
+        for _ in range(N):                  # loop over every surviving atom
+            if rng.random() < lam * dt:
+                decayed += 1
+        N -= decayed
+        counts.append(N)
+    return np.array(counts)
+
+
+def simulate(N0, lam, dt=0.05, steps=200, seed=0):
+    """Radioactive decay, vectorised NumPy version (fast)."""
+    if lam < 0:
+        raise ValueError("lam must be >= 0")
+    rng = np.random.default_rng(seed)
+    N = N0
+    counts = [N0]
+    for _ in range(steps):
+        decayed = rng.binomial(N, lam * dt)  # decide all atoms at once
+        N -= decayed
+        counts.append(N)
+    return np.array(counts)
