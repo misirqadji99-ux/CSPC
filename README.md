@@ -26,3 +26,7 @@ conda activate cspc
 
 **Conclusion:**
 - NumPy vectorization drastically improves performance compared to standard Python loops when processing large arrays (200,000 atoms), achieving a massive speed-up. Setting up Conda environments and unit tests ensures full reproducibility and code reliability across different systems.
+
+## Pw1 — Lab B
+
+The observed decay data followed an exponential decay curve. Comparing the scatter of observed values with the analytical law `N(t) = N0 * exp(-LAMBDA * t)` in `figure.png`, the two shapes clearly match, confirming the data obeys the expected decay law. The Snakemake pipeline automates figure generation: it reads `decay_observed.csv`, runs `plot.py`, and produces `figure.png`, rerunning only when inputs change.
